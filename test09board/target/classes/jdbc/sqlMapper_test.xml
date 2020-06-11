@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kjm.board">	
+	<insert id="insert" parameterType="com.kjm.board.model.RequestVO">
+		INSERT INTO STEST(NUM, NAME, TITLE, CONTENT, FILE_NAME)
+		VALUES((SELECT NVL(MAX(NUM + 1), 1) FROM STEST), #{name}, #{title}, #{content},  #{fileName})		
+	</insert>
+
+	<update id="update" parameterType="com.kjm.board.model.RequestVO">
+		UPDATE STEST
+		SET
+			TITLE = #{title}
+			, CONTENT = #{content}			
+			, NAME = #{name}
+			<if test="fileName != null">
+			, FILE_NAME = #{fileName}
+			</if>
+		WHERE NUM = #{num}		
+	</update>
+
+	<delete id="delete" parameterType="int">
+		delete from stest where
+		num=#{num}
+	</delete>
+
+	<select id="selectAll" resultType="com.kjm.board.model.RequestVO">
+		SELECT
+			NUM num
+			, TITLE title			
+			, NAME name
+			, TO_CHAR(REG_DATE, 'YYYY.MM.DD') regDate
+			, FILE_NAME fileName
+		FROM STEST
+		ORDER BY NUM DESC		
+	</select>
+
+
+	<!-- select * from member where id=? -->
+	<select id="searchOne" resultType="com.kjm.board.model.RequestVO">
+		SELECT
+			NUM num
+			, TITLE title		
+			, CONTENT content	
+			, NAME name
+			, TO_CHAR(REG_DATE, 'YYYY.MM.DD') regDate
+			, FILE_NAME fileName
+		FROM STEST
+		WHERE NUM = #{num} 				
+	</select>
+
+	<!-- select * from member where name like ?"; -->
+	<select id="searchList" resultType="com.kjm.board.model.RequestVO"
+		parameterType="hashmap">
+		SELECT 
+			NUM num
+			, TITLE title			
+			, NAME name
+			, TO_CHAR(REG_DATE, 'YYYY.MM.DD') regDate
+			, FILE_NAME fileName
+		FROM STEST
+		<if test="searchKey =='all'">
+			where (TITLE LIKE '%'||#{searchWord}||'%' OR NAME LIKE '%'||#{searchWord}||'%' 
+		</if>
+		<if test="searchKey =='title'">
+			where TITLE LIKE '%'||#{searchWord}||'%'
+		</if>
+		<if test="searchKey =='name'">
+			where NAME LIKE '%'||#{searchWord}||'%'
+		</if>
+	</select>
+</mapper>
